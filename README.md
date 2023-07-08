@@ -3,6 +3,8 @@ CANoe, V-Studio, TSR, ADAS Systems
 
 ------------------------------------------------------------------------------------------------------------------------------------
 
+![ABS / BatteryPack Test & Ploting](./my_image.png "My Image")
+
 # Testing Strategies in Python
 
 This notebook covers best testing strategies in Python to ensure the reliability and robustness of the code.
