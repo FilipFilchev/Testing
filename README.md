@@ -8,6 +8,7 @@ CANoe, V-Studio, TSR, ADAS Systems
 # Testing Strategies in Python
 
 This notebook covers best testing strategies in Python to ensure the reliability and robustness of the code.
+#### You'r code can't fail unit tests if you don't write any unit tests ;) 
 
 ## 1. Unit Testing
 
