@@ -33,7 +33,7 @@ if __name__ == "__main__":
     unittest.main(argv=[''], verbosity=2, exit=False)
 ```
 
-#Assert:
+# Assert:
 
 ```
 def multiply(a, b):
@@ -197,7 +197,7 @@ To run this test using pytest:
 - pytest will automatically discover and run the test cases in your file.
 - You should see the test result indicating that the test has failed.
 
-  ###Output
+  ### Output
 
 ```
 ============================= test session starts ==============================
