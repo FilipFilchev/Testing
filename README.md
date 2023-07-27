@@ -3,7 +3,7 @@ CANoe, V-Studio, TSR, ADAS Systems
 
 ------------------------------------------------------------------------------------------------------------------------------------
 
-![ABS / BatteryPack Test & Ploting](./my_image.png "My Image")
+![ABS / BatteryPack Test & Ploting](./my_imageABS.png "My Image")
 
 # Testing Strategies in Python
 
