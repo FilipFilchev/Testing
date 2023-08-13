@@ -4,13 +4,15 @@ CANoe, V-Studio, TSR, ADAS Systems
 ------------------------------------------------------------------------------------------------------------------------------------
 
 # CANoe
-*for more projects --> CAN-ADAS-TSR *
+**more CAN projects here -> CAN-ADAS-TSR**
 
 ![TSR](./img2.png "My Image")
 
 ![TSR](./img3.png "My Image")
 
 # Testing Strategies in Python
+
+![ABS](./my_imageABS.png "My Image")
 
 This notebook covers best testing strategies in Python to ensure the reliability and robustness of the code.
 #### Your code can't fail unit tests if you don't write any unit tests ;) 
