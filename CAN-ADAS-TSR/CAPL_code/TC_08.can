@@ -1,0 +1,183 @@
+/*@!Encoding:1251*/
+// Filip Filchev TC_08
+
+/*************************************************************************************
+Test Case Name: In case of at least 5% difference of the vehicle speed signals used to 
+calculation the TSR state (TraffSign_Status_ADAS), then ADAS module must send signal 
+TraffSign_Status_ADAS with value “TSR in Error” and signals TraffSign_Warning_ADAS and 
+TraffSign_SpeedLimit_ADAS with value “SNA”.           
+Test Case ID: TC_08        
+Requirement:  BCC_036 
+**************************************************************************************/
+
+
+
+/*************************************************************************************
+
+Preconditions:
+
+**************************************************************************************/
+
+//Conventions
+//ON: depends; OFF: depends; testWaitForTimeout(in_ms); SNA 255/0x3; key out: 0x0; 0x0 No warning; 0x1 Warning type2, Warning Type1: 0x2; 
+//TSR @sysvar::SignDetection::SpeedLimitSign = x, Display testStepPast/Fail(“str ”,
+//”Passed/Fail: Signal TraffSign_SpeedLimit_ADAS = “, (int)$ TraffSign_SpeedLimit_ADAS.raw) ]
+
+
+includes
+{
+  
+
+  // Include any CAN libraries if needed
+}
+
+
+
+/*************************************************************************************
+
+Actions:
+
+**************************************************************************************/
+
+/*
+on start
+{
+  // Do nothing on start
+  
+}
+*/
+
+
+testfunction Test8 (char ParameterString[])
+{
+    /*--------------- Declaration and initialization of local variables ------------*/
+$TrafficSignRequest_IC = 0x1; // default is OFF; 0x2-ON; 0x3-SNA
+$TraffSign_Status_ADAS = 0x0; // 0x1 is TSR Ready; OFF: 0x0; Active: 0x2; Error: 0x3; SNA: 0x7
+$TraffSign_SpeedLimit_ADAS = 0x0; // 0x0 is No detected SL; Sl50= 0x5; 0xA: SL100; 0xF SNA
+$TrafficSignWarningType_IC = 0x0; // 0x0 is No Warning; 0x1-Warning2; 0x2-WarningType1; 0x3-SNA
+$TraffSign_Warning_ADAS = 0x2; // 0x2 is Warning Off; 0x1-1; 0x0-2; 0x3-SNA
+$IgnState_PowerMngr = 0x0; // default is Ignition key Out 0x0; 0x1 off; 0x2 on; 0x3 SNA
+$VehicleSpeed_ABS = 0; //Default is SNA
+$VehicleSpeed_FL_ABS = 0; //Default is SNA
+$VehicleSpeed_FR_ABS = 0; //Default is SNA
+$VehicleSpeed_RL_ABS = 0; //Default is SNA
+$VehicleSpeed_RR_ABS = 0; //Default is SNA
+  
+testStep("Pre:","Set all values to OFF/0"); // no transmitted signals (except the speed) should be SNA because that cause an TSR in Error mode
+  
+  
+    /* -------------- Test Case Body -----------------------------------------------*/
+
+  
+  // Step 1
+  $IgnState_PowerMngr = 0x2; // Ignition ON
+  testStep("Step 1:","Set IgnState_PowerMngr = ON");
+  // Step 2
+  $TrafficSignRequest_IC = 0x2; // Traffic sign ON
+  testStep("Step 2:","Set TrafficSignRequest_IC = ON");
+  // Step 3-8
+  $VehicleSpeed_ABS = 0;
+  $VehicleSpeed_FL_ABS = 0;
+  $VehicleSpeed_FR_ABS = 0;
+  $VehicleSpeed_RL_ABS = 0;
+  $VehicleSpeed_RR_ABS = 0;
+  testStep("Steps 3-7:","Set all ABS speeds to 0 km/h");
+  
+ // Step 8
+  //set speed limit to 50km/h
+  @sysvar::SignDetection::SpeedLimitSign = 50; // The camera is shown a 50 km/h speed limit sign
+  testWaitForTimeout(1500);
+  testStep("Step 8:","To the camera is shown 50km/h speed limit traffic sign");
+  
+  testWaitForTimeout(500); // wait 500ms
+  //ASSERT
+  if ($TraffSign_Status_ADAS == 0x1)
+  {
+    testStepPass("Steps 1-8", "PASSED: TSR State is Ready");
+  }
+  else
+  {
+    testStepFail("Steps 1-8","FAILED: Signal TraffSign_Status_ADAS == 0x%X Expected: 0x1 (Ready)", (int)$TraffSign_Status_ADAS.raw);
+  }
+  // Testing for vehicle speed signals having a difference of exactly 5%:
+  // Step 9-13
+  $VehicleSpeed_ABS = 475;
+  $VehicleSpeed_FL_ABS = 495;
+  $VehicleSpeed_FR_ABS = 515;
+  $VehicleSpeed_RL_ABS = 535;
+  $VehicleSpeed_RR_ABS = 555;
+  testStep("Step 9-13:","Set ABS speeds to a difference of exactly 5%: (47.5, 49.5,51.5,53.5,55.5) km/h");
+  
+  testWaitForTimeout(500); // wait 500ms
+  //ASSERT
+  if ($TraffSign_Status_ADAS == 0x3 && $TraffSign_Warning_ADAS == 0x3 && $TraffSign_SpeedLimit_ADAS == 0xF)
+  {
+    testStepPass("Steps 9,13", "PASSED: TSR State is in Error and Warning ADAS and SpeedLimit ADAS are SNA/NoSL");
+  }
+  else
+  {
+    testStepFail("Steps 9-13","FAILED: Signal TraffSign_Status_ADAS == 0x%X Expected: 0x3 (TSR in Error), TraffSign_Warning_ADAS == 0x%X. Expected is 0x3 (SNA) and TraffSign_SpeedLimit_ADAS == 0x%X. Expected: 0x3 (No SL detected)", (int)$TraffSign_Status_ADAS.raw, (int)$TraffSign_Warning_ADAS.raw, (int)$TraffSign_SpeedLimit_ADAS.raw);
+    testStepFail("On exaclty 5% difference still TSR Active REPORTED BUG!");
+  }
+  
+  // Step 14-18
+  $VehicleSpeed_ABS = 490;
+  $VehicleSpeed_FL_ABS = 600;
+  $VehicleSpeed_FR_ABS = 500;
+  $VehicleSpeed_RL_ABS = 700;
+  $VehicleSpeed_RR_ABS = 650;
+  testStep("Step 14-18:","Set ABS speeds to a difference greater than 5%: (49,60,50,70,65) km/h");
+  
+  testWaitForTimeout(500); // wait 500ms
+  //ASSERT
+  if ($TraffSign_Status_ADAS == 0x3 && $TraffSign_Warning_ADAS == 0x3 && $TraffSign_SpeedLimit_ADAS == 0xF)
+  {
+    testStepPass("Steps 14,18", "PASSED: TSR State is in Error and Warning ADAS and SpeedLimit ADAS are SNA/NoSL");
+  }
+  else
+  {
+    testStepFail("Steps 14-18","FAILED: Signal TraffSign_Status_ADAS == 0x%X Expected: 0x3 (TSR in Error), TraffSign_Warning_ADAS == 0x%X. Expected is 0x3 (SNA) and TraffSign_SpeedLimit_ADAS == 0x%X. Expected: 0x3 (No SL detected)", (int)$TraffSign_Status_ADAS.raw, (int)$TraffSign_Warning_ADAS.raw, (int)$TraffSign_SpeedLimit_ADAS.raw);
+  }
+  
+  // Step 19-23
+  $VehicleSpeed_ABS = 490;
+  $VehicleSpeed_FL_ABS = 500;
+  $VehicleSpeed_FR_ABS = 510;
+  $VehicleSpeed_RL_ABS = 490;
+  $VehicleSpeed_RR_ABS = 510;
+  testStep("Step 19-23:","Set ABS speeds to a difference less than 5%: (49,50,52,49,51) km/h");
+  
+  testWaitForTimeout(500); // wait 500ms
+  //ASSERT
+  if ($TraffSign_Status_ADAS == 0x2 && $TraffSign_Warning_ADAS == 0x2 && $TraffSign_SpeedLimit_ADAS == 0x5)
+  {
+    testStepPass("Steps 19,23", "PASSED: TSR State is Active, Warning ADAS is off and SpeedLimit ADAS is 50km/h");
+  }
+  else
+  {
+    testStepFail("Steps 19-23","FAILED: Signal TraffSign_Status_ADAS == 0x%X Expected: 0x2 (TSR Active), TraffSign_Warning_ADAS == 0x%X. Expected is 0x2 (off) and TraffSign_SpeedLimit_ADAS == 0x%X. Expected: 0x5 (50km/h)", (int)$TraffSign_Status_ADAS.raw, (int)$TraffSign_Warning_ADAS.raw, (int)$TraffSign_SpeedLimit_ADAS.raw);
+  }
+  
+  // Step 24-28
+  $VehicleSpeed_ABS = 2000;
+  $VehicleSpeed_FL_ABS = 1000;
+  $VehicleSpeed_FR_ABS = 1500;
+  $VehicleSpeed_RL_ABS = 1700;
+  $VehicleSpeed_RR_ABS = 1900;
+  testStep("Step 24-28:","Set ABS speeds to a difference greater than 5% above 100km/h: (200,100,150,170,190) km/h");
+  
+  testWaitForTimeout(500); // wait 500ms
+  //ASSERT
+  if ($TraffSign_Status_ADAS == 0x3 && $TraffSign_Warning_ADAS == 0x3 && $TraffSign_SpeedLimit_ADAS == 0xF)
+  {
+    testStepPass("Steps 24-28", "PASSED: TSR State is in Error and Warning ADAS and SpeedLimit ADAS are SNA/NoSL");
+  }
+  else
+  {
+    testStepFail("Steps 24-28","FAILED: Signal TraffSign_Status_ADAS == 0x%X Expected: 0x3 (TSR in Error), TraffSign_Warning_ADAS == 0x%X. Expected is 0x3 (SNA) and TraffSign_SpeedLimit_ADAS == 0x%X. Expected: 0x3 (No SL detected)", (int)$TraffSign_Status_ADAS.raw, (int)$TraffSign_Warning_ADAS.raw, (int)$TraffSign_SpeedLimit_ADAS.raw);
+  }
+    
+
+    /* -------------- Test Case End ------------------------------------------------*/
+
+}
