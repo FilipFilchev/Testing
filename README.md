@@ -1,5 +1,5 @@
 # Testing
-CANoe, V-Studio, TSR, ADAS Systems
+CANoe, V-Studio, TSR, ADAS Systems, eBike Systems
 
 ------------------------------------------------------------------------------------------------------------------------------------
 
@@ -16,6 +16,9 @@ CANoe, V-Studio, TSR, ADAS Systems
 
 This notebook covers best testing strategies in Python to ensure the reliability and robustness of the code.
 #### Your code can't fail unit tests if you don't write any unit tests ;) 
+
+
+![eBike](./ebike.png)
 
 ## 1. Unit Testing
 
@@ -225,6 +228,8 @@ E        +  where False = is_even(3)
 test_is_even.py:6: AssertionError
 ========================= 1 failed in 0.03 seconds ==============================
 ```
+
+
   
 
 ## Conclusion
